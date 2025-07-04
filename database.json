@@ -1,14 +1,10 @@
 {
   "version": 2,
-  "last_updated": "2025-07-04T02:45:45.686516Z",
+  "last_updated": "2025-07-03T14:41:43.584704Z",
   "series": {
     "292798": {
       "1-1": "https://raw.githubusercontent.com/Liu1443452494/emby-screenshot-db/main/EpisodeScreenshots/292798/season-1-episode-1.jpg",
       "1-2": "https://raw.githubusercontent.com/Liu1443452494/emby-screenshot-db/main/EpisodeScreenshots/292798/season-1-episode-2.jpg"
-    },
-    "292609": {
-      "1-12": "https://raw.githubusercontent.com/Liu1443452494/emby-screenshot-db/main/EpisodeScreenshots/292609/season-1-episode-12.jpg",
-      "1-13": "https://raw.githubusercontent.com/Liu1443452494/emby-screenshot-db/main/EpisodeScreenshots/292609/season-1-episode-13.jpg"
     }
   }
 }
