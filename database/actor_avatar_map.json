@@ -1,8 +1,326 @@
 {
+  "1541648": {
+    "actor_name": "金晨",
+    "source": "tmdb",
+    "image_path": "/wVsQG1eNFFmCI3HTaje4Rox8SFA.jpg",
+    "last_updated": "2025-07-09T12:35:14.616663Z"
+  },
+  "1185787": {
+    "actor_name": "柳岩",
+    "source": "tmdb",
+    "image_path": "/34PhqnEmRL2K7GVbB1gV8RQVw80.jpg",
+    "last_updated": "2025-07-09T13:01:09.530819Z"
+  },
+  "1752460": {
+    "actor_name": "邓月平",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/celebrity/m/public/p1500183006.67.webp",
+    "last_updated": "2025-07-09T12:36:57.273867Z"
+  },
+  "127720": {
+    "actor_name": "郑裕美",
+    "source": "tmdb",
+    "image_path": "/67XBJpPzOOsEQdaitWMYM2PK5dU.jpg",
+    "last_updated": "2025-07-09T12:37:51.572754Z"
+  },
+  "150903": {
+    "actor_name": "孔刘",
+    "source": "douban",
+    "image_path": "https://img9.doubanio.com/view/personage/m/public/964b504efbfd1819e51c78dbba88f9f5.jpg",
+    "last_updated": "2025-07-09T12:38:17.138132Z"
+  },
+  "2340912": {
+    "actor_name": "朴世贤",
+    "source": "tmdb",
+    "image_path": "/q0EzfwHGaD62HIEEnVJZ0pG3pnK.jpg",
+    "last_updated": "2025-07-09T12:39:13.868045Z"
+  },
+  "99687": {
+    "actor_name": "张涵予",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/celebrity/m/public/p49047.webp",
+    "last_updated": "2025-07-09T12:40:16.177595Z"
+  },
+  "1376106": {
+    "actor_name": "黄轩",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/celebrity/m/public/p1623134422.73.webp",
+    "last_updated": "2025-07-09T12:40:42.526005Z"
+  },
+  "25246": {
+    "actor_name": "刘德华",
+    "source": "douban",
+    "image_path": "https://img2.doubanio.com/view/personage/m/public/8af9415de20cb759a27ad9c0565b9991.jpg",
+    "last_updated": "2025-07-09T12:41:15.683745Z"
+  },
+  "78253": {
+    "actor_name": "文咏珊",
+    "source": "tmdb",
+    "image_path": "/4BXyeKXxTTZdY4ZrJP9ZlZaihLG.jpg",
+    "last_updated": "2025-07-09T12:41:41.067255Z"
+  },
+  "1982750": {
+    "actor_name": "尚语贤",
+    "source": "tmdb",
+    "image_path": "/8XZFkR5W7l2czo7oFV2oUswdlD0.jpg",
+    "last_updated": "2025-07-09T12:42:24.891170Z"
+  },
+  "2956": {
+    "actor_name": "阿曼达·皮特",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/celebrity/m/public/p27792.webp",
+    "last_updated": "2025-07-09T12:44:35.881230Z"
+  },
+  "204": {
+    "actor_name": "凯特·温斯莱特",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/personage/m/public/af34e222dd3723f09746159614f44107.jpg",
+    "last_updated": "2025-07-09T12:46:13.221896Z"
+  },
+  "6161": {
+    "actor_name": "詹妮弗·康纳利",
+    "source": "douban",
+    "image_path": "https://img1.doubanio.com/view/personage/m/public/3201df4b0d9a3d2c94344a4eeecb731c.jpg",
+    "last_updated": "2025-07-09T12:46:58.965973Z"
+  },
+  "1222992": {
+    "actor_name": "艾莎·冈萨雷斯",
+    "source": "douban",
+    "image_path": "https://img1.doubanio.com/view/personage/m/public/41e424936cf47ad798cf78f57aeaec6b.jpg",
+    "last_updated": "2025-07-09T12:47:42.006721Z"
+  },
+  "70106": {
+    "actor_name": "谢霆锋",
+    "source": "tmdb",
+    "image_path": "/gNn875jcFFxQD9IX7LhpZeAPqtk.jpg",
+    "last_updated": "2025-07-09T12:48:40.473616Z"
+  },
+  "1175568": {
+    "actor_name": "童飞",
+    "source": "douban",
+    "image_path": "https://img9.doubanio.com/view/personage/m/public/987286bb482661eee2856218660e4a64.jpg",
+    "last_updated": "2025-07-09T12:49:05.397696Z"
+  },
+  "1151657": {
+    "actor_name": "景甜",
+    "source": "tmdb",
+    "image_path": "/7jP3VMJOMjx90EalALHnlWKU36n.jpg",
+    "last_updated": "2025-07-09T12:49:46.581256Z"
+  },
+  "1209782": {
+    "actor_name": "胡然",
+    "source": "tmdb",
+    "image_path": "/oNwNoLJg707G0HSIDnNU4mpaoIu.jpg",
+    "last_updated": "2025-07-09T12:51:00.209030Z"
+  },
+  "1362280": {
+    "actor_name": "文凯玲",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/personage/m/public/af1ca3b47c3147aa847958fac11b4f6a.jpg",
+    "last_updated": "2025-07-09T12:52:11.620504Z"
+  },
+  "1411561": {
+    "actor_name": "萨莎·露丝",
+    "source": "douban",
+    "image_path": "https://img2.doubanio.com/view/celebrity/m/public/p1570117033.31.webp",
+    "last_updated": "2025-07-09T12:54:26.381966Z"
+  },
+  "1059217": {
+    "actor_name": "邓家佳",
+    "source": "tmdb",
+    "image_path": "/dVyKfZ9A2GEdR7nOfWqpJPjoHq6.jpg",
+    "last_updated": "2025-07-09T12:55:18.310904Z"
+  },
+  "1756786": {
+    "actor_name": "李金铭",
+    "source": "tmdb",
+    "image_path": "/xFRjVAhzbEM1EjwQWnZUCkgSivj.jpg",
+    "last_updated": "2025-07-09T12:55:53.895143Z"
+  },
+  "71070": {
+    "actor_name": "阿曼达·塞弗里德",
+    "source": "tmdb",
+    "image_path": "/daiee2XgNOEqzgVm1o6JmtEg4zR.jpg",
+    "last_updated": "2025-07-09T12:58:12.450641Z"
+  },
+  "1813": {
+    "actor_name": "安妮·海瑟薇",
+    "source": "tmdb",
+    "image_path": "/s6tflSD20MGz04ZR2R1lZvhmC4Y.jpg",
+    "last_updated": "2025-07-09T12:58:56.032231Z"
+  },
+  "1336": {
+    "actor_name": "李连杰",
+    "source": "douban",
+    "image_path": "https://img9.doubanio.com/view/celebrity/m/public/p48974.webp",
+    "last_updated": "2025-07-09T13:00:09.116791Z"
+  },
+  "1185786": {
+    "actor_name": "刘诗诗",
+    "source": "tmdb",
+    "image_path": "/3CnEl0MkyvKPHfOYoVc7zFwLfur.jpg",
+    "last_updated": "2025-07-09T13:00:32.593715Z"
+  },
+  "938326": {
+    "actor_name": "谭卓",
+    "source": "douban",
+    "image_path": "https://img9.doubanio.com/view/personage/m/public/a95100387a05ddaaaf9600dd034a9916.jpg",
+    "last_updated": "2025-07-09T13:02:03.802191Z"
+  },
+  "1005911": {
+    "actor_name": "卫诗雅",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/personage/m/public/b45e856967710ec0ec7c823c1af1a692.jpg",
+    "last_updated": "2025-07-09T13:02:55.265685Z"
+  },
+  "1815238": {
+    "actor_name": "钟楚曦",
+    "source": "tmdb",
+    "image_path": "/cZ91u4GS1aT8Q9NLcxyZykXDipm.jpg",
+    "last_updated": "2025-07-09T13:07:25.610385Z"
+  },
+  "1173805": {
+    "actor_name": "张子枫",
+    "source": "tmdb",
+    "image_path": "/euvYx4dM8PeGlYBEHQm9CqMMM8k.jpg",
+    "last_updated": "2025-07-09T13:06:08.675779Z"
+  },
+  "1909812": {
+    "actor_name": "李兰迪",
+    "source": "douban",
+    "image_path": "https://img9.doubanio.com/view/celebrity/m/public/p1512974990.54.webp",
+    "last_updated": "2025-07-09T13:07:03.309646Z"
+  },
+  "1006864": {
+    "actor_name": "倪妮",
+    "source": "tmdb",
+    "image_path": "/vyqZqSV2BZPOYKV7lp7gRdGrkwU.jpg",
+    "last_updated": "2025-07-09T13:08:40.446561Z"
+  },
+  "5081": {
+    "actor_name": "艾米莉·布朗特",
+    "source": "tmdb",
+    "image_path": "/2mfJILwVGr4RBha3OihQVfq5nyL.jpg",
+    "last_updated": "2025-07-09T13:10:39.551922Z"
+  },
+  "1173214": {
+    "actor_name": "佟丽娅",
+    "source": "tmdb",
+    "image_path": "/bEtCK6OyXriHDKAy9ZhEUNOaudm.jpg",
+    "last_updated": "2025-07-09T13:11:14.871081Z"
+  },
+  "572043": {
+    "actor_name": "杨幂",
+    "source": "tmdb",
+    "image_path": "/eLB6SOE68EUXmb8g5db2FRl0Wyq.jpg",
+    "last_updated": "2025-07-09T13:12:03.123653Z"
+  },
+  "1245": {
+    "actor_name": "斯嘉丽·约翰逊",
+    "source": "douban",
+    "image_path": "https://img1.doubanio.com/view/celebrity/m/public/p37050.webp",
+    "last_updated": "2025-07-09T13:12:55.127383Z"
+  },
+  "87942": {
+    "actor_name": "朱茵",
+    "source": "tmdb",
+    "image_path": "/wc2CteGkr41KkUndm2pCOXQPgUE.jpg",
+    "last_updated": "2025-07-09T13:13:46.558188Z"
+  },
+  "57607": {
+    "actor_name": "周星驰",
+    "source": "tmdb",
+    "image_path": "/rO1e30Yq7KzgZFAXZDosyAShhhM.jpg",
+    "last_updated": "2025-07-09T13:14:29.204112Z"
+  },
+  "87945": {
+    "actor_name": "蓝洁瑛",
+    "source": "tmdb",
+    "image_path": "/xHqzucloai89yMhDSBSsEikOjjX.jpg",
+    "last_updated": "2025-07-09T13:15:27.510666Z"
+  },
+  "2077932": {
+    "actor_name": "黄一琳",
+    "source": "douban",
+    "image_path": "https://img9.doubanio.com/view/personage/m/public/7e78cec0ee03df053cf68bdd133ff854.jpg",
+    "last_updated": "2025-07-09T13:17:52.725083Z"
+  },
+  "2227": {
+    "actor_name": "妮可·基德曼",
+    "source": "tmdb",
+    "image_path": "/a1sAEtSkIpa3yUlQHnnDakMYXJB.jpg",
+    "last_updated": "2025-07-09T13:21:11.985533Z"
+  },
+  "3967": {
+    "actor_name": "凯特·贝金赛尔",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/celebrity/m/public/p20523.webp",
+    "last_updated": "2025-07-09T13:22:48.459487Z"
+  },
+  "6885": {
+    "actor_name": "查理兹·塞隆",
+    "source": "douban",
+    "image_path": "https://img2.doubanio.com/view/celebrity/m/public/p1402973611.41.webp",
+    "last_updated": "2025-07-09T13:23:37.602035Z"
+  },
   "236048": {
     "actor_name": "罗茜·汉丁顿-惠特莉",
     "source": "tmdb",
-    "image_path": "/t/p/original/lyFa0dbITKNvNPBYSIPKNJdfRcn.jpg",
-    "last_updated": "2025-07-09T11:28:32.508832Z"
+    "image_path": "/uVL2iW7wjkc0hklI5ANosBINOfh.jpg",
+    "last_updated": "2025-07-09T13:24:09.623861Z"
+  },
+  "1397778": {
+    "actor_name": "安雅·泰勒-乔伊",
+    "source": "tmdb",
+    "image_path": "/iwxsznakIOqlJzgFiaROrbMj9V8.jpg",
+    "last_updated": "2025-07-09T13:25:27.494530Z"
+  },
+  "54693": {
+    "actor_name": "艾玛·斯通",
+    "source": "tmdb",
+    "image_path": "/sFlktjWgUANqfUnqWJOhzICvp4v.jpg",
+    "last_updated": "2025-07-09T13:26:56.724007Z"
+  },
+  "3141": {
+    "actor_name": "玛丽莎·托梅",
+    "source": "tmdb",
+    "image_path": "/5w6qM8FWsl5SutKSpx6Va64eCTE.jpg",
+    "last_updated": "2025-07-09T13:27:37.329549Z"
+  },
+  "1291460": {
+    "actor_name": "古力娜扎",
+    "source": "tmdb",
+    "image_path": "/mLnyw6k4K6tlBZF3JdvFMmq2NmZ.jpg",
+    "last_updated": "2025-07-09T13:28:39.410516Z"
+  },
+  "4176028": {
+    "actor_name": "娜然",
+    "source": "tmdb",
+    "image_path": "/5lYYtkYSczlfMuTTFNmrO1pBf3m.jpg",
+    "last_updated": "2025-07-09T13:29:41.148908Z"
+  },
+  "1299244": {
+    "actor_name": "李来",
+    "source": "douban",
+    "image_path": "https://img9.doubanio.com/view/celebrity/m/public/p1602662428.14.webp",
+    "last_updated": "2025-07-09T13:30:48.184228Z"
+  },
+  "114316": {
+    "actor_name": "张榕容",
+    "source": "douban",
+    "image_path": "https://img1.doubanio.com/view/personage/m/public/99bcfb69c3acfadc36ee1f36cee94619.jpg",
+    "last_updated": "2025-07-09T13:31:54.771890Z"
+  },
+  "2270252": {
+    "actor_name": "王净",
+    "source": "douban",
+    "image_path": "https://img1.doubanio.com/view/personage/m/public/3e170f714f7a9c739f0782f868acd72c.jpg",
+    "last_updated": "2025-07-09T13:32:31.696484Z"
+  },
+  "2440951": {
+    "actor_name": "周也",
+    "source": "tmdb",
+    "image_path": "/alqSqe6RmhIkZ6eUcjDXS6QTJhS.jpg",
+    "last_updated": "2025-07-09T13:34:48.736505Z"
   }
 }
