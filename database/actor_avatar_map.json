@@ -322,5 +322,83 @@
     "source": "tmdb",
     "image_path": "/alqSqe6RmhIkZ6eUcjDXS6QTJhS.jpg",
     "last_updated": "2025-07-09T13:34:48.736505Z"
+  },
+  "1599854": {
+    "actor_name": "张天爱",
+    "source": "tmdb",
+    "image_path": "/7YfldHgtWzOLOjLJ1gdODPeKiHV.jpg",
+    "last_updated": "2025-07-09T15:00:48.319189Z"
+  },
+  "2581662": {
+    "actor_name": "向涵之",
+    "source": "tmdb",
+    "image_path": "/kkElCV1dip9eVL6lZDCNqt1skGL.jpg",
+    "last_updated": "2025-07-09T15:01:59.841928Z"
+  },
+  "2122379": {
+    "actor_name": "檀健次",
+    "source": "tmdb",
+    "image_path": "/820bumChrcrPc3eDS2oYolJjac8.jpg",
+    "last_updated": "2025-07-09T15:04:25.518835Z"
+  },
+  "1877119": {
+    "actor_name": "宋轶",
+    "source": "douban",
+    "image_path": "https://img1.doubanio.com/view/personage/m/public/802fd4743942ad8511d7671b544310a8.jpg",
+    "last_updated": "2025-07-09T15:06:32.963980Z"
+  },
+  "2104489": {
+    "actor_name": "宋祖儿",
+    "source": "tmdb",
+    "image_path": "/dGsRiRgAOjePHLJzlYNMhlPlB06.jpg",
+    "last_updated": "2025-07-09T15:07:17.621214Z"
+  },
+  "2682877": {
+    "actor_name": "刘浩存",
+    "source": "tmdb",
+    "image_path": "/cn32HNmbpBQqbAnoPBQq2sj3ax5.jpg",
+    "last_updated": "2025-07-09T15:08:04.049755Z"
+  },
+  "2430198": {
+    "actor_name": "田曦薇",
+    "source": "tmdb",
+    "image_path": "/nbXm9FIa4e3jJ1KB3rKTiSNyeHC.jpg",
+    "last_updated": "2025-07-09T15:08:41.505272Z"
+  },
+  "2275991": {
+    "actor_name": "陈小纭",
+    "source": "tmdb",
+    "image_path": "/5hbLwalzQ3Q5EqGFTbE34TQgsqK.jpg",
+    "last_updated": "2025-07-09T15:09:11.064778Z"
+  },
+  "1935149": {
+    "actor_name": "刘令姿",
+    "source": "tmdb",
+    "image_path": "/qJP23ZWnyVHyX58kEH6MmS3uHZl.jpg",
+    "last_updated": "2025-07-09T15:09:42.058312Z"
+  },
+  "3590388": {
+    "actor_name": "包上恩",
+    "source": "douban",
+    "image_path": "https://img1.doubanio.com/view/personage/m/public/878bb5cd0322dd3ad7fc583b53efce70.jpg",
+    "last_updated": "2025-07-09T15:10:11.964857Z"
+  },
+  "1736257": {
+    "actor_name": "李一桐",
+    "source": "tmdb",
+    "image_path": "/8nwZ8gxbrsbEC7aHa8ecMNUtPLc.jpg",
+    "last_updated": "2025-07-09T15:11:17.908404Z"
+  },
+  "1838200": {
+    "actor_name": "祝绪丹",
+    "source": "tmdb",
+    "image_path": "/lWMhXW7aGFglw8KUFahB94IWS4I.jpg",
+    "last_updated": "2025-07-09T15:12:16.221185Z"
+  },
+  "2128468": {
+    "actor_name": "孟子义",
+    "source": "tmdb",
+    "image_path": "/dTDCXiykK5c1l22wt5xq1q7bzls.jpg",
+    "last_updated": "2025-07-09T15:13:12.846895Z"
   }
 }
