@@ -123300,5 +123300,150 @@
         "role": "加纳"
       }
     }
+  },
+  "388399": {
+    "title": "恐袭波士顿",
+    "map": {
+      "马克·沃尔伯格": {
+        "tmdb_id": "13240",
+        "role": "汤米·桑德斯 Tommy Saunders"
+      },
+      "约翰·古德曼": {
+        "tmdb_id": "1230",
+        "role": "艾德·戴维斯委员长 Commissioner Ed Davis"
+      },
+      "J·K·西蒙斯": {
+        "tmdb_id": "18999",
+        "role": "杰弗里·普里亚中士 Sergeant Jeffrey Pugliese"
+      },
+      "凯文·贝肯": {
+        "tmdb_id": "4724",
+        "role": "理查德·德劳雷尔特工 Special Agent Richard DesLauriers"
+      },
+      "米歇尔·莫纳汉": {
+        "tmdb_id": "11705",
+        "role": "卡罗尔·桑德斯 Carol Saunders"
+      },
+      "亚历克斯·沃尔夫": {
+        "tmdb_id": "934281",
+        "role": "贾哈尔·察尔纳耶夫 Dzhokhar Tsarnaev"
+      },
+      "迪牟诺罗凯茨": {
+        "tmdb_id": "2075179",
+        "role": "塔梅尔兰·察尔纳耶夫 Tamerlan Tsarnaev"
+      },
+      "迈克尔·比奇": {
+        "tmdb_id": "87118",
+        "role": "德瓦尔·帕特里克州长"
+      },
+      "文森特·库拉托拉": {
+        "tmdb_id": "171719",
+        "role": "汤玛斯·曼尼诺市长 Mayor Thomas Menino"
+      },
+      "詹姆斯·科尔比": {
+        "tmdb_id": "115975",
+        "role": "比利·伊凡斯警长 Superintendent Billy Evans"
+      },
+      "杰克·皮克": {
+        "tmdb_id": "1456280",
+        "role": "肖恩·科利尔"
+      },
+      "梅莉莎·班诺伊": {
+        "tmdb_id": "129104",
+        "role": "凯瑟琳·拉塞尔 Katherine Russell"
+      },
+      "欧阳万成": {
+        "tmdb_id": "1468779",
+        "role": "邓恩·孟 Dun Meng"
+      },
+      "Chris O'Shea": {
+        "tmdb_id": "1439612",
+        "role": "帕特里克·唐尼斯"
+      },
+      "蕾切尔·布鲁斯纳翰": {
+        "tmdb_id": "993774",
+        "role": "杰西卡·肯斯基"
+      },
+      "Khandi Alexander": {
+        "tmdb_id": "19265",
+        "role": "维罗妮卡"
+      },
+      "拉娜·孔多尔": {
+        "tmdb_id": "1452046",
+        "role": "李"
+      },
+      "Dustin Tucker": {
+        "tmdb_id": "1732327",
+        "role": "史蒂夫·伍尔芬登"
+      },
+      "Martine Assaf": {
+        "tmdb_id": "1752794",
+        "role": "康妮·普格利塞"
+      },
+      "比利·史密斯": {
+        "tmdb_id": "1218180",
+        "role": "查理·柯林斯"
+      },
+      "Paige MacLean": {
+        "tmdb_id": "1772824",
+        "role": "丽莎·墨菲"
+      },
+      "亚当·特雷斯": {
+        "tmdb_id": "27858",
+        "role": "约翰·布拉德肖"
+      },
+      "Hampton Fluker": {
+        "tmdb_id": "1758632",
+        "role": "詹姆斯·威廉姆斯"
+      },
+      "Jay Giannone": {
+        "tmdb_id": "170240",
+        "role": "吉米"
+      },
+      "Cliff Moylan": {
+        "tmdb_id": "1410481",
+        "role": "约翰·麦克莱伦中士"
+      },
+      "伊利亚·郭": {
+        "tmdb_id": "1732424",
+        "role": "迪亚斯 Dias"
+      },
+      "Dean Neistat": {
+        "tmdb_id": "1456723",
+        "role": "迈克尔·巴特勒"
+      },
+      "约翰·菲奥雷": {
+        "tmdb_id": "935624",
+        "role": "Michael Thomas"
+      },
+      "Kathy Harum": {
+        "tmdb_id": "1752780",
+        "role": "Carol's Mom"
+      },
+      "埃里卡·麦克德莫特": {
+        "tmdb_id": "999737",
+        "role": "Jimmy's Girlfriend"
+      },
+      "John Franchi": {
+        "tmdb_id": "928638",
+        "role": "Park Pedestrian"
+      },
+      "Arthur Wahlberg": {
+        "tmdb_id": "1903695",
+        "role": "Uncle Archie"
+      },
+      "Anthony \"Ace\" Thomas": {
+        "tmdb_id": "2559012",
+        "role": "Third Officer at Falcon"
+      },
+      "David Ortiz": {
+        "tmdb_id": "209594",
+        "role": "David Ortiz"
+      },
+      "杰·卡拉莱斯": {
+        "tmdb_id": "3476760",
+        "role": "Marathon Attendee (uncredited)"
+      }
+    }
   }
 }
