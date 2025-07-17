@@ -123171,5 +123171,134 @@
         "role": "燕蓁"
       }
     }
+  },
+  "541671": {
+    "title": "疾速追杀：芭蕾杀姬",
+    "map": {
+      "安娜·德·阿玛斯": {
+        "tmdb_id": "224513",
+        "role": "伊芙 Eve"
+      },
+      "基努·里维斯": {
+        "tmdb_id": "6384",
+        "role": "约翰·威克 John Wick"
+      },
+      "伊恩·麦柯肖恩": {
+        "tmdb_id": "6972",
+        "role": "温斯顿 Winston"
+      },
+      "安杰丽卡·休斯顿": {
+        "tmdb_id": "5657",
+        "role": "女族长 The Director"
+      },
+      "加布里埃尔·伯恩": {
+        "tmdb_id": "5168",
+        "role": "首领 The Chancellor"
+      },
+      "卡塔琳娜·桑迪诺·莫雷诺": {
+        "tmdb_id": "5887",
+        "role": "莉娜"
+      },
+      "Ava McCarthy": {
+        "tmdb_id": "4872540",
+        "role": "艾拉"
+      },
+      "朱丽叶特·多赫提": {
+        "tmdb_id": "2052200",
+        "role": "塔季扬娜 Tatiana"
+      },
+      "诺曼·瑞杜斯": {
+        "tmdb_id": "4886",
+        "role": "派因 Daniel Pine"
+      },
+      "兰斯·莱迪克": {
+        "tmdb_id": "129101",
+        "role": "卡戎 Charon"
+      },
+      "莎朗·邓肯-布鲁斯特": {
+        "tmdb_id": "195666",
+        "role": "诺吉"
+      },
+      "大卫·卡斯塔涅达": {
+        "tmdb_id": "1450392",
+        "role": "哈维尔"
+      },
+      "维多利亚·孔德": {
+        "tmdb_id": "4276302",
+        "role": "童年伊芙 Young Eve"
+      },
+      "罗伯特·马瑟": {
+        "tmdb_id": "1464090",
+        "role": "德克斯"
+      },
+      "崔秀英": {
+        "tmdb_id": "1326874",
+        "role": "卡特拉·帕克"
+      },
+      "郑斗洪": {
+        "tmdb_id": "77058",
+        "role": "伊尔成"
+      },
+      "安娜·帕里约": {
+        "tmdb_id": "57298",
+        "role": "布拉格看门人 Prague Concierge"
+      },
+      "Marc Cram": {
+        "tmdb_id": "1950915",
+        "role": "布拉格经理"
+      },
+      "福岛莉拉": {
+        "tmdb_id": "1179243",
+        "role": "佩特拉 Petra"
+      },
+      "亚伯拉罕·波波拉": {
+        "tmdb_id": "1432064",
+        "role": "弗兰克 Frank"
+      },
+      "Magdalena Šittová": {
+        "tmdb_id": "2832950",
+        "role": "阿格尼莎女服务员"
+      },
+      "Waris Ahluwalia": {
+        "tmdb_id": "5301",
+        "role": "The Eye"
+      },
+      "丹尼尔·伯恩哈特": {
+        "tmdb_id": "9452",
+        "role": "伤疤眼刺客"
+      },
+      "Anna Schmidtmajerová": {
+        "tmdb_id": "2288567",
+        "role": "哈尔施塔特母亲"
+      },
+      "Emílie Páclová": {
+        "tmdb_id": "5495073",
+        "role": "哈尔施塔特女儿"
+      },
+      "杰克逊·斯皮德尔": {
+        "tmdb_id": "1779512",
+        "role": "米克尔"
+      },
+      "James Beaumont": {
+        "tmdb_id": "2563021",
+        "role": "俱乐部推广人"
+      },
+      "啜希·班尼特": {
+        "tmdb_id": "1215189",
+        "role": "穆里尔"
+      },
+      "Stephanie Brush": {
+        "tmdb_id": "5527223",
+        "role": "塔蒂安娜剧院附近的女人"
+      },
+      "Mirko Marchesi": {
+        "tmdb_id": "5495081",
+        "role": "The Baptist"
+      },
+      "Zac Ladkin": {
+        "tmdb_id": "5527224",
+        "role": "加纳"
+      }
+    }
   }
 }
