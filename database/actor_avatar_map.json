@@ -550,5 +550,11 @@
     "source": "tmdb",
     "image_path": "/dVGbD8gNinRKVHfmuiAbBs0xi31.jpg",
     "last_updated": "2025-07-28T03:02:43.757387Z"
+  },
+  "1476992": {
+    "actor_name": "陈都灵",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/personage/m/public/72d77b266bda16231631990fe1ced043.jpg",
+    "last_updated": "2025-08-10T09:13:15.615041Z"
   }
 }
