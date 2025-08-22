@@ -129464,5 +129464,150 @@
         "role": "北田靖 (闪电队队员"
       }
     }
+  },
+  "movie-575265": {
+    "title": "碟中谍8：最终清算",
+    "map": {
+      "汤姆·克鲁斯": {
+        "tmdb_id": "500",
+        "role": "伊森·亨特 Ethan Hunt"
+      },
+      "海莉·阿特维尔": {
+        "tmdb_id": "39459",
+        "role": "格蕾丝 Grace"
+      },
+      "西蒙·佩吉": {
+        "tmdb_id": "11108",
+        "role": "班吉 Benji Dunn"
+      },
+      "文·瑞姆斯": {
+        "tmdb_id": "10182",
+        "role": "卢瑟 Luther Stickell"
+      },
+      "庞·克莱门捷夫": {
+        "tmdb_id": "139820",
+        "role": "帕丽斯 Paris"
+      },
+      "亨利·车尔尼": {
+        "tmdb_id": "15319",
+        "role": "基特里奇"
+      },
+      "埃赛·莫拉莱斯": {
+        "tmdb_id": "65344",
+        "role": "加布里埃尔"
+      },
+      "珍妮特·麦克蒂尔": {
+        "tmdb_id": "47627",
+        "role": "沃尔特斯 Walters"
+      },
+      "尼克·奥弗曼": {
+        "tmdb_id": "17039",
+        "role": "西德尼 Sydney"
+      },
+      "汉娜·沃丁厄姆": {
+        "tmdb_id": "1278487",
+        "role": "尼丽 Admiral Neely"
+      },
+      "安吉拉·贝塞特": {
+        "tmdb_id": "9780",
+        "role": "艾莉卡·史隆 Erica Sloan"
+      },
+      "特拉梅尔·提尔曼": {
+        "tmdb_id": "2028037",
+        "role": "布莱索 Captain Bledsoe"
+      },
+      "谢伊·惠格姆": {
+        "tmdb_id": "74242",
+        "role": "布里格斯 Jasper Briggs"
+      },
+      "格雷格·塔爾贊·戴維斯": {
+        "tmdb_id": "2080646",
+        "role": "德加斯"
+      },
+      "查尔斯·帕内尔": {
+        "tmdb_id": "124112",
+        "role": "理查兹 Richards"
+      },
+      "马克·加蒂斯": {
+        "tmdb_id": "34546",
+        "role": "埃斯特朗 Angstrom"
+      },
+      "罗尔夫·撒克逊": {
+        "tmdb_id": "151438",
+        "role": "威廉·唐洛"
+      },
+      "露西·图卢加鲁克": {
+        "tmdb_id": "97302",
+        "role": "塔蓓萨 Tapeesa"
+      },
+      "加利·艾尔维斯": {
+        "tmdb_id": "2130",
+        "role": "丹林格"
+      },
+      "凯蒂·M·奥布莱恩": {
+        "tmdb_id": "2252989",
+        "role": "科迪亚克"
+      },
+      "托马斯·帕雷德斯": {
+        "tmdb_id": "2963838",
+        "role": "哈格尔（饰演托马斯·帕雷德斯）"
+      },
+      "斯蒂芬·欧阳": {
+        "tmdb_id": "1451123",
+        "role": "药片"
+      },
+      "保罗·布林": {
+        "tmdb_id": "1488465",
+        "role": "雪莉"
+      },
+      "帕沙·D·林奇尼科夫": {
+        "tmdb_id": "52762",
+        "role": "科尔佐夫上尉"
+      },
+      "Kwabena Ansah": {
+        "tmdb_id": "2151680",
+        "role": "埃里卡的儿子"
+      },
+      "Ryn Alleyne": {
+        "tmdb_id": "5453383",
+        "role": "侍僧"
+      },
+      "Ned Campbell": {
+        "tmdb_id": "4293424",
+        "role": "侍僧"
+      },
+      "Charlie Carter": {
+        "tmdb_id": "5335021",
+        "role": "侍僧"
+      },
+      "Chantelle Roman": {
+        "tmdb_id": "5453385",
+        "role": "侍僧"
+      },
+      "Mark Taqqaugaq": {
+        "tmdb_id": "3473918",
+        "role": "因纽特渔民"
+      },
+      "Ipeelie Ootoova": {
+        "tmdb_id": "1948110",
+        "role": "因纽特渔民"
+      },
+      "Jacky Qrunnut": {
+        "tmdb_id": "2189841",
+        "role": "因纽特渔民"
+      },
+      "Izyan Hay": {
+        "tmdb_id": "5453387",
+        "role": "护士"
+      },
+      "罗斯·麦考尔": {
+        "tmdb_id": "56366",
+        "role": "布尔丁特工"
+      },
+      "霍特·麦克卡兰尼": {
+        "tmdb_id": "7497",
+        "role": "塞林 Secretary of Defense Bernstein"
+      }
+    }
   }
 }
