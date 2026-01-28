@@ -127,11 +127,11 @@
                 border-radius: 12px !important;
             }
             .portraitCard:not(.card-horiz) .cardImage {
-                transition: transform 0.2s ease-out !important;
+                transition: transform 0.25s ease-out !important;
                 transform-origin: center center !important;
             }
             .portraitCard:not(.card-horiz):hover .cardImage {
-                transform: scale(1.05) !important;
+                transform: scale(1.01) !important;
             }
             /* 确保普通海报的容器在悬停时不发生位移或缩放 */
             .portraitCard:not(.card-horiz):hover .cardBox {
