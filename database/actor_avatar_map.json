@@ -327,7 +327,7 @@
     "actor_name": "张天爱",
     "source": "tmdb",
     "image_path": "/7YfldHgtWzOLOjLJ1gdODPeKiHV.jpg",
-    "last_updated": "2025-07-09T15:00:48.319189Z"
+    "last_updated": "2026-02-03T11:03:52.694165Z"
   },
   "2581662": {
     "actor_name": "向涵之",
@@ -580,5 +580,11 @@
     "source": "tmdb",
     "image_path": "/3W570R5S7hcjKb1gLLRMVc7liJH.jpg",
     "last_updated": "2026-01-29T12:53:10.483889Z"
+  },
+  "83036": {
+    "actor_name": "朴宝英",
+    "source": "tmdb",
+    "image_path": "/x1LNh8i8XmO3oqNYzRslzYj1VoZ.jpg",
+    "last_updated": "2026-03-23T13:28:01.598856Z"
   }
 }
