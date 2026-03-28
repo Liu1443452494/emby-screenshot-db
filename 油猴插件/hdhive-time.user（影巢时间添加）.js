@@ -10,20 +10,9 @@
  * 
  * 配置：
  *   1. 打开脚本编辑页面
- *   2. 找到下方的 API_KEY 变量（约第57行）
+ *   2. 找到下方的 API_KEY 变量
  *   3. 将你的API Key填入引号中
  *      例如：const API_KEY = '你的API密钥';
- *   4. 找到 TIME_STYLE 变量（约第58行）
- *   5. 修改数字选择样式（1-7）
- * 
- * 时间标签样式：
- *   1 - 简约透明（灰色背景）
- *   2 - 渐变胶囊（紫蓝渐变）← 默认
- *   3 - 玻璃拟态（毛玻璃效果）
- *   4 - 霓虹效果（绿色发光）
- *   5 - 标签徽章（红色醒目）
- *   6 - 暗金质感（金色边框）
- *   7 - 极简圆点（左侧竖线）
  * 
  * API Key获取方式：
  *   - 登录 HDHive 网站
@@ -37,13 +26,13 @@
  *   - https://hdhive.com/tmdb/tv/*
  * 
  * 版本历史：
+ *   v2.7 - 简化代码，固定使用渐变胶囊样式
+ *   v2.6 - 添加样式切换按钮
  *   v2.5 - 添加7种时间标签样式可选
  *   v2.4 - 每次Tab切换都重新排序
  *   v2.3 - 修复重定向后Tab切换失效问题
  *   v2.2 - 添加卡片渲染等待重试机制
  *   v2.1 - 修复Tab切换时时间标签丢失问题
- *   v2.0 - 移除MutationObserver，使用Set记录已排序Tab
- *   v1.9 - 添加Tab切换支持
  * 
  * ============================================================
  */
@@ -51,7 +40,7 @@
 // ==UserScript==
 // @name         HDHive 资源添加时间显示
 // @namespace    http://tampermonkey.net/
-// @version      2.5
+// @version      2.7
 // @description  在HDHive资源卡片右上角显示添加时间，并按时间排序
 // @author       You
 // @match        https://hdhive.com/movie/*
@@ -67,89 +56,7 @@
     'use strict';
 
     const API_KEY = '14df4a54e93c96e701db5cb2f29c3aba';
-    const TIME_STYLE = 2;
     const BASE_URL = 'https://hdhive.com/api/open';
-
-    const TIME_STYLES = {
-        1: {
-            color: '#999',
-            fontSize: '12px',
-            background: 'rgba(0, 0, 0, 0.6)',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            border: 'none',
-            fontWeight: 'normal',
-            textShadow: 'none',
-            backdropFilter: 'none'
-        },
-        2: {
-            color: '#fff',
-            fontSize: '11px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            padding: '3px 8px',
-            borderRadius: '12px',
-            border: 'none',
-            fontWeight: '500',
-            textShadow: 'none',
-            backdropFilter: 'none'
-        },
-        3: {
-            color: '#fff',
-            fontSize: '12px',
-            background: 'rgba(255, 255, 255, 0.15)',
-            padding: '3px 8px',
-            borderRadius: '6px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            fontWeight: 'normal',
-            textShadow: 'none',
-            backdropFilter: 'blur(4px)'
-        },
-        4: {
-            color: '#00ff88',
-            fontSize: '11px',
-            background: 'rgba(0, 0, 0, 0.7)',
-            padding: '3px 8px',
-            borderRadius: '4px',
-            border: '1px solid #00ff88',
-            fontWeight: 'normal',
-            textShadow: '0 0 5px #00ff88',
-            backdropFilter: 'none'
-        },
-        5: {
-            color: '#fff',
-            fontSize: '10px',
-            background: '#ff4757',
-            padding: '2px 6px',
-            borderRadius: '2px',
-            border: 'none',
-            fontWeight: 'bold',
-            textShadow: 'none',
-            backdropFilter: 'none'
-        },
-        6: {
-            color: '#ffd700',
-            fontSize: '11px',
-            background: 'linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%)',
-            padding: '3px 8px',
-            borderRadius: '4px',
-            border: '1px solid #ffd700',
-            fontWeight: '500',
-            textShadow: 'none',
-            backdropFilter: 'none'
-        },
-        7: {
-            color: '#aaa',
-            fontSize: '10px',
-            background: 'transparent',
-            padding: '0 0 0 6px',
-            borderRadius: '0',
-            border: 'none',
-            borderLeft: '2px solid #667eea',
-            fontWeight: 'normal',
-            textShadow: 'none',
-            backdropFilter: 'none'
-        }
-    };
 
     let tmdbId = null;
     let mediaType = null;
@@ -211,22 +118,16 @@
         timeDiv.className = 'hdhive-created-time';
         timeDiv.textContent = createdAt;
         
-        const style = TIME_STYLES[TIME_STYLE] || TIME_STYLES[1];
-        
         timeDiv.style.cssText = `
             position: absolute;
             top: 8px;
             right: 8px;
-            color: ${style.color};
-            font-size: ${style.fontSize};
-            background: ${style.background};
-            padding: ${style.padding};
-            border-radius: ${style.borderRadius};
-            border: ${style.border};
-            font-weight: ${style.fontWeight};
-            text-shadow: ${style.textShadow};
-            backdrop-filter: ${style.backdropFilter};
-            -webkit-backdrop-filter: ${style.backdropFilter};
+            color: #fff;
+            font-size: 11px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
             z-index: 10;
             white-space: nowrap;
             pointer-events: none;
@@ -385,7 +286,7 @@
         });
         
         tabListenersAdded = true;
-        console.log(`[HDHive时间] 已添加Tab切换监听器，当前样式: ${TIME_STYLE}`);
+        console.log(`[HDHive时间] 已添加Tab切换监听器`);
     }
 
     async function processResources(sessionId) {
