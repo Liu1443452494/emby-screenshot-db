@@ -24,6 +24,9 @@
 
     const SCRIPT_ID = 'drc';
     const STORAGE_PREFIX = 'drc_v1_';
+    const CACHE_DB_NAME = 'HT98_Search_Assistant_Cache';
+    const CACHE_STORE_NAME = 'threads';
+    const CACHE_TTL = 2 * 24 * 60 * 60 * 1000;
     const isSearchPage = location.pathname.includes('search.php');
     const hasThreadList = Boolean(document.querySelector('#threadlist, #threadlisttableid'));
 
@@ -32,6 +35,7 @@
     const defaultSettings = {
         seamless: true,
         scrollIntervalSec: 5,
+        extractIntervalSec: 1,
         maxPageLoads: 10,
         whitelistForums: [],
         keepTitleKeywords: [],
@@ -58,6 +62,7 @@
         totalCount: 0,
         hiddenCount: 0,
         remainingCount: 0,
+        threadCache: {},
         processedLinks: new Set(),
         loggedKeys: new Set()
     };
@@ -82,6 +87,7 @@
             next[key] = normalizeStringList(next[key]);
         });
         next.scrollIntervalSec = Math.max(3, Number(next.scrollIntervalSec || defaultSettings.scrollIntervalSec));
+        next.extractIntervalSec = Math.max(1, Number(next.extractIntervalSec || defaultSettings.extractIntervalSec));
         next.maxPageLoads = Math.max(0, Number(next.maxPageLoads || defaultSettings.maxPageLoads));
         next.seamless = Boolean(next.seamless);
         next.keepTitleMode = next.keepTitleMode === 'and' ? 'and' : 'or';
@@ -181,6 +187,121 @@
         const href = rawHref(link);
         return href ? new URL(href, location.href).href : '';
     }
+
+    function getTid(url) {
+        const value = String(url || '');
+        let match = value.match(/tid=(\d+)/);
+        if (match) return match[1];
+        match = value.match(/thread-(\d+)/);
+        if (match) return match[1];
+        return value;
+    }
+
+    const CacheDB = {
+        db: null,
+        ready: null,
+        init() {
+            if (this.ready) return this.ready;
+            this.ready = new Promise((resolve) => {
+                if (!window.indexedDB) {
+                    resolve();
+                    return;
+                }
+                const request = indexedDB.open(CACHE_DB_NAME, 1);
+                const fallbackTimer = window.setTimeout(() => resolve(), 1500);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(CACHE_STORE_NAME)) {
+                        db.createObjectStore(CACHE_STORE_NAME, { keyPath: 'key' });
+                    }
+                };
+                request.onsuccess = (event) => {
+                    window.clearTimeout(fallbackTimer);
+                    this.db = event.target.result;
+                    this.clean();
+                    resolve();
+                };
+                request.onerror = () => {
+                    window.clearTimeout(fallbackTimer);
+                    resolve();
+                };
+                request.onblocked = () => {
+                    window.clearTimeout(fallbackTimer);
+                    resolve();
+                };
+            });
+            return this.ready;
+        },
+        async ensureReady() {
+            if (this.ready) await this.ready;
+        },
+        async get(key) {
+            await this.ensureReady();
+            if (!this.db || !key) return null;
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(CACHE_STORE_NAME, 'readonly');
+                const request = tx.objectStore(CACHE_STORE_NAME).get(key);
+                request.onsuccess = () => {
+                    const result = request.result;
+                    if (result && Date.now() - result.ts < CACHE_TTL) {
+                        resolve(result.data);
+                    } else {
+                        if (result) this.delete(key);
+                        resolve(null);
+                    }
+                };
+                request.onerror = () => resolve(null);
+            });
+        },
+        async set(key, data) {
+            await this.ensureReady();
+            if (!this.db || !key) return;
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(CACHE_STORE_NAME, 'readwrite');
+                tx.objectStore(CACHE_STORE_NAME).put({ key, data, ts: Date.now() });
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => resolve();
+            });
+        },
+        async delete(key) {
+            await this.ensureReady();
+            if (!this.db || !key) return;
+            const tx = this.db.transaction(CACHE_STORE_NAME, 'readwrite');
+            tx.objectStore(CACHE_STORE_NAME).delete(key);
+        },
+        async clean() {
+            await this.ensureReady();
+            if (!this.db) return 0;
+            return new Promise((resolve) => {
+                let removed = 0;
+                const tx = this.db.transaction(CACHE_STORE_NAME, 'readwrite');
+                const request = tx.objectStore(CACHE_STORE_NAME).openCursor();
+                const now = Date.now();
+                request.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (!cursor) return;
+                    if (now - cursor.value.ts >= CACHE_TTL) {
+                        cursor.delete();
+                        removed += 1;
+                    }
+                    cursor.continue();
+                };
+                tx.oncomplete = () => resolve(removed);
+                tx.onerror = () => resolve(removed);
+            });
+        },
+        async clear() {
+            await this.ensureReady();
+            state.threadCache = {};
+            if (!this.db) return;
+            return new Promise((resolve) => {
+                const tx = this.db.transaction(CACHE_STORE_NAME, 'readwrite');
+                tx.objectStore(CACHE_STORE_NAME).clear();
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => resolve();
+            });
+        }
+    };
 
     function addLog(message, detail) {
         const time = new Date().toLocaleTimeString();
@@ -586,6 +707,17 @@
     }
 
     async function fetchThreadResources(url) {
+        const cacheKey = getTid(url);
+        if (state.threadCache[cacheKey]) {
+            return Object.assign({}, state.threadCache[cacheKey], { fromCache: true });
+        }
+
+        const cached = await CacheDB.get(cacheKey);
+        if (cached) {
+            state.threadCache[cacheKey] = cached;
+            return Object.assign({}, cached, { fromCache: true });
+        }
+
         const html = await requestText(url);
         const doc = new DOMParser().parseFromString(html, 'text/html');
         decodeCloudflareEmail(doc);
@@ -599,13 +731,17 @@
         const sourceNodes = postNodes.length ? postNodes : [doc.body];
         const text = sourceNodes.map((node) => node.innerText || node.textContent || '').join('\n');
         const meta = extractMetaFromText(text);
-        return {
+        const result = {
             links: extractResourcesFromText(text),
             torrents: extractTorrentsFromDoc(doc),
             actress: meta.actress,
             size: meta.size,
             error: ''
         };
+
+        state.threadCache[cacheKey] = result;
+        await CacheDB.set(cacheKey, result);
+        return result;
     }
 
     function addToPool(record) {
@@ -673,11 +809,13 @@
 
         state.extractRunning = true;
         state.extractStopRequested = false;
-        updateExtractProgress('资源提取：0 / ' + selected.length + ' | 成功 0 | 失败 0 | 新增 0');
+        const extractIntervalMs = Math.max(1, Number(state.settings.extractIntervalSec || 1)) * 1000;
+        updateExtractProgress('资源提取：0 / ' + selected.length + ' | 成功 0 | 失败 0 | 新增 0 | 缓存 0 | 间隔 ' + state.settings.extractIntervalSec + ' 秒');
 
         let success = 0;
         let failed = 0;
         let addedLinks = 0;
+        let cacheHits = 0;
 
         for (let i = 0; i < selected.length; i += 1) {
             if (state.extractStopRequested) break;
@@ -685,10 +823,15 @@
             const cb = selected[i];
             const item = cb.closest('li.pbw, tbody');
             const info = extractItemInfo(item);
-            updateExtractProgress('资源提取：' + (i + 1) + ' / ' + selected.length + ' | 成功 ' + success + ' | 失败 ' + failed + ' | 新增 ' + addedLinks);
+            let usedCache = false;
+            updateExtractProgress('资源提取：' + (i + 1) + ' / ' + selected.length + ' | 成功 ' + success + ' | 失败 ' + failed + ' | 新增 ' + addedLinks + ' | 缓存 ' + cacheHits + ' | 间隔 ' + state.settings.extractIntervalSec + ' 秒');
 
             try {
                 const result = await fetchThreadResources(info.url);
+                if (result.fromCache) {
+                    cacheHits += 1;
+                    usedCache = true;
+                }
                 if (result.error) {
                     failed += 1;
                     markItemExtractStatus(item, '提取失败：' + result.error, false);
@@ -720,15 +863,15 @@
                 addLog('提取失败', error.message + ' | ' + info.title);
             }
 
-            updateExtractProgress('资源提取：' + (i + 1) + ' / ' + selected.length + ' | 成功 ' + success + ' | 失败 ' + failed + ' | 新增 ' + addedLinks);
-            await delay(600);
+            updateExtractProgress('资源提取：' + (i + 1) + ' / ' + selected.length + ' | 成功 ' + success + ' | 失败 ' + failed + ' | 新增 ' + addedLinks + ' | 缓存 ' + cacheHits + ' | 间隔 ' + state.settings.extractIntervalSec + ' 秒');
+            if (!state.extractStopRequested && !usedCache) await delay(extractIntervalMs);
         }
 
         const stopped = state.extractStopRequested;
         state.extractRunning = false;
         state.extractStopRequested = false;
-        updateExtractProgress((stopped ? '提取已停止：' : '提取完成：') + '成功 ' + success + ' | 失败 ' + failed + ' | 新增资源 ' + addedLinks);
-        addLog(stopped ? '提取已停止' : '提取完成', '帖子成功 ' + success + ' 个，失败 ' + failed + ' 个，新增资源 ' + addedLinks + ' 个');
+        updateExtractProgress((stopped ? '提取已停止：' : '提取完成：') + '成功 ' + success + ' | 失败 ' + failed + ' | 新增资源 ' + addedLinks + ' | 缓存 ' + cacheHits);
+        addLog(stopped ? '提取已停止' : '提取完成', '帖子成功 ' + success + ' 个，失败 ' + failed + ' 个，新增资源 ' + addedLinks + ' 个，缓存命中 ' + cacheHits + ' 个');
         updateOperationStatus();
     }
 
@@ -1049,6 +1192,21 @@
         };
         countRow.appendChild(countInput);
 
+        const extractIntervalRow = createSettingRow('资源提取间隔（秒）');
+        const extractIntervalInput = document.createElement('input');
+        extractIntervalInput.id = 'drc-extract-interval';
+        extractIntervalInput.type = 'number';
+        extractIntervalInput.min = '1';
+        extractIntervalInput.step = '1';
+        extractIntervalInput.className = 'drc-small-input';
+        extractIntervalInput.value = state.settings.extractIntervalSec;
+        extractIntervalInput.onchange = () => {
+            state.settings.extractIntervalSec = Math.max(1, Number(extractIntervalInput.value || 1));
+            extractIntervalInput.value = state.settings.extractIntervalSec;
+            saveSettings();
+        };
+        extractIntervalRow.appendChild(extractIntervalInput);
+
         const status = document.createElement('div');
         status.id = 'drc-op-status';
         status.className = 'drc-status';
@@ -1078,7 +1236,7 @@
         extractProgress.className = 'drc-status drc-extract-progress';
         extractProgress.textContent = '资源提取：未运行';
 
-        root.append(seamlessRow, intervalRow, countRow, status, extractProgress, row1, row2);
+        root.append(seamlessRow, intervalRow, countRow, extractIntervalRow, status, extractProgress, row1, row2);
     }
 
     function buildPoolTab(root) {
@@ -1140,6 +1298,7 @@
             '<button type="button" id="drc-import" class="drc-button drc-button-gray">导入配置</button>',
             '</div>',
             '<input type="file" id="drc-import-file" accept=".json" style="display:none">',
+            '<button type="button" id="drc-clear-resource-cache" class="drc-button drc-button-yellow">清理资源缓存</button>',
             '<button type="button" id="drc-reset" class="drc-button drc-button-red">重置本脚本数据</button>'
         ].join('');
 
@@ -1158,6 +1317,12 @@
             URL.revokeObjectURL(link.href);
         };
         root.querySelector('#drc-import').onclick = () => fileInput.click();
+        root.querySelector('#drc-clear-resource-cache').onclick = async () => {
+            if (!confirm('确定清理资源缓存吗？\n\n只会清理详情页资源缓存，不会清空规则、收纳池和其他设置。')) return;
+            await CacheDB.clear();
+            addLog('资源缓存已清理', '');
+            alert('资源缓存已清理。');
+        };
         fileInput.onchange = () => {
             const file = fileInput.files && fileInput.files[0];
             if (!file) return;
@@ -1177,10 +1342,11 @@
             };
             reader.readAsText(file, 'utf-8');
         };
-        root.querySelector('#drc-reset').onclick = () => {
+        root.querySelector('#drc-reset').onclick = async () => {
             if (!confirm('确定重置本脚本的所有设置和收纳池吗？')) return;
             GM_deleteValue(STORAGE_PREFIX + 'settings');
             GM_deleteValue(STORAGE_PREFIX + 'pool');
+            await CacheDB.clear();
             location.reload();
         };
     }
@@ -1366,5 +1532,11 @@
     processPageItems();
     observeListChanges();
     updateOperationStatus();
+    CacheDB.init().then(() => {
+        addLog('资源缓存已就绪', '有效期 2 天');
+    });
+    window.setInterval(() => {
+        CacheDB.clean();
+    }, 10 * 60 * 1000);
     addLog('脚本已启动', '当前下一页：' + (state.nextPageUrl ? '有' : '无'));
 })();
