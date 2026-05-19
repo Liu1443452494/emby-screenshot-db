@@ -593,5 +593,18 @@
     "image_path": "https://img3.doubanio.com/view/personage/m/public/bbadd5c3031ba43c815da905b24c4a21.jpg",
     "last_updated": "2026-04-13T05:13:33.320098Z",
     "douban_avatar_url": "https://img3.doubanio.com/view/personage/m/public/bbadd5c3031ba43c815da905b24c4a21.jpg"
+  },
+  "1993060": {
+    "actor_name": "张俪",
+    "source": "douban",
+    "image_path": "https://img3.doubanio.com/view/celebrity/m/public/p1495256790.93.webp",
+    "last_updated": "2026-04-14T04:24:11.481194Z",
+    "douban_avatar_url": "https://img3.doubanio.com/view/celebrity/m/public/p1495256790.93.webp"
+  },
+  "4273": {
+    "actor_name": "夏洛特·甘斯布",
+    "source": "tmdb",
+    "image_path": "/hzLRm0970PrxE1VlRCEVi9fBcnc.jpg",
+    "last_updated": "2026-04-16T07:29:50.354933Z"
   }
 }
