@@ -612,5 +612,12 @@
     "source": "tmdb",
     "image_path": "/wQbPu0QF0IeyXpqJmdmRbfNk6CM.jpg",
     "last_updated": "2026-06-22T09:41:41.317520Z"
+  },
+  "38280": {
+    "actor_name": "汤唯",
+    "source": "tmdb",
+    "image_path": "/kf5FOxXlv0a6vLKN5psO9lauT24.jpg",
+    "last_updated": "2026-07-07T15:57:22.821937Z",
+    "douban_avatar_url": "https://img3.doubanio.com/view/celebrity/m/public/p1507363720.81.webp"
   }
 }
