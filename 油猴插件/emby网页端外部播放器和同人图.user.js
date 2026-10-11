@@ -449,8 +449,7 @@ function startExternalPlayers(){
   function refreshButtons(){
     var old=document.getElementById('ExternalPlayersBtns');
     if(old) old.remove();
-    _lastItemId=null;
-    setTimeout(tryInject,0);
+    resetInjection();
   }
   function makeOptionButton(label,active,onClick){
     var btn=document.createElement('button');
@@ -566,14 +565,82 @@ function startExternalPlayers(){
     btn.addEventListener('click',function(){openPlayer(p.key,item);});
     return btn;
   }
-  function showFlag(){
-    return !!document.querySelector(SELECTORS.mediaInfo);
+  function isVisible(element){
+    if(!element||!element.isConnected) return false;
+    for(var node=element;node&&node.nodeType===1;node=node.parentElement){
+      if(node.hidden||node.classList.contains('hide')||node.getAttribute('aria-hidden')==='true') return false;
+      var style=window.getComputedStyle(node);
+      if(style.display==='none'||style.visibility==='hidden'||style.visibility==='collapse') return false;
+    }
+    return true;
+  }
+  function showFlag(anchor){
+    var root=anchor&&anchor.closest("div[is='emby-scroller']");
+    if(!root) return false;
+    var infos=root.querySelectorAll('.mediaInfo:not(.hide)');
+    for(var i=0;i<infos.length;i++){
+      if(isVisible(infos[i])) return true;
+    }
+    return false;
+  }
+  function getDetailButtons(){
+    var root=_view&&isVisible(_view)?_view:document;
+    var anchors=root.querySelectorAll(SELECTORS.detailButtons);
+    var itemId=getItemId();
+    for(var i=0;i<anchors.length;i++){
+      var anchor=anchors[i];
+      if(!isVisible(anchor)||!showFlag(anchor)) continue;
+      // 页面切换期间，已有的媒体控制器也必须对应当前地址。
+      var matches=true;
+      for(var node=anchor;node;node=node.parentElement){
+        var item=node.controller&&node.controller.currentItem;
+        if(item&&item.Id&&String(item.Id)!==itemId){matches=false;break;}
+      }
+      if(matches) return anchor;
+    }
+    return null;
   }
   var _injecting=false;
   var _lastItemId=null;
+  var _injection=null;
+  var _checkTimer=null;
+  var _retryTimer=null;
+  var _retryUntil=0;
+  var _view=null;
+  function scheduleInject(delay){
+    if(_checkTimer!==null) return;
+    _checkTimer=setTimeout(function(){
+      _checkTimer=null;
+      tryInject();
+    },delay);
+  }
+  function stopRetry(){
+    clearTimeout(_retryTimer);
+    _retryTimer=null;
+    _retryUntil=0;
+  }
+  function retryInject(){
+    if(_retryTimer!==null||Date.now()>=_retryUntil) return;
+    _retryTimer=setTimeout(function(){
+      _retryTimer=null;
+      scheduleInject(0);
+    },500);
+  }
+  function resetInjection(event){
+    _injection=null;
+    _injecting=false;
+    _lastItemId=null;
+    _view=event&&event.target&&event.target.nodeType===1?event.target:null;
+    stopRetry();
+    _retryUntil=Date.now()+10000;
+    clearTimeout(_checkTimer);
+    _checkTimer=null;
+    scheduleInject(0);
+  }
   function createButtons(anchor,item){
     var wrapper=document.createElement('div');
     wrapper.id='ExternalPlayersBtns';
+    wrapper.setAttribute('data-item-id',String(item.Id));
     wrapper.className='detailButtons flex align-items-flex-start flex-wrap-wrap detail-lineItem';
     appendOptions(wrapper);
     wrapper.appendChild(makeCopyStreamButton(item));
@@ -584,44 +651,93 @@ function startExternalPlayers(){
     anchor.insertAdjacentElement('afterend',wrapper);
   }
   function tryInject(){
-    if(_injecting) return;
-    var detailBtns=document.querySelector(SELECTORS.detailButtons);
-    if(!detailBtns||!showFlag()) return;
     var itemId=getItemId();
-    if(!itemId) return;
-    var existing=document.getElementById('ExternalPlayersBtns');
-    if(existing&&_lastItemId===itemId) return;
-    if(existing) existing.remove();
+    if(!itemId){
+      _injection=null;
+      _injecting=false;
+      _lastItemId=null;
+      stopRetry();
+      return;
+    }
+    var detailBtns=getDetailButtons();
+    if(!detailBtns){
+      _injection=null;
+      _injecting=false;
+      retryInject();
+      return;
+    }
+    if(!_injection||_lastItemId!==itemId||_injection.hash!==location.hash||_injection.anchor!==detailBtns){
+      _injection={hash:location.hash,anchor:detailBtns,item:null,attempts:0,noMedia:false,retryAt:0};
+      _injecting=false;
+      _lastItemId=itemId;
+      _retryUntil=Date.now()+10000;
+    }
+    var state=_injection;
+    var existing=detailBtns.nextElementSibling;
+    if(existing&&existing.id==='ExternalPlayersBtns'){
+      if(existing.getAttribute('data-item-id')===itemId&&isVisible(existing)){
+        stopRetry();
+        return;
+      }
+      existing.remove();
+    }
+    if(state.noMedia){stopRetry();return;}
+    if(state.item){
+      document.querySelectorAll('#ExternalPlayersBtns').forEach(function(old){old.remove();});
+      createButtons(detailBtns,state.item);
+      stopRetry();
+      return;
+    }
+    if(_injecting||Date.now()<state.retryAt){retryInject();return;}
+    if(state.attempts>=3){stopRetry();return;}
     _injecting=true;
-    _lastItemId=itemId;
+    state.attempts++;
+    retryInject();
     try{
       var userId=getUserId();
       ApiClient.getItem(userId,itemId).then(function(item){
-        var old=document.getElementById('ExternalPlayersBtns');
-        if(old) old.remove();
+        // 旧页面的请求只能更新自己的状态，不能插入或删除新页面的控件。
+        if(_injection!==state||getItemId()!==itemId||location.hash!==state.hash||getDetailButtons()!==detailBtns) return;
         if(item&&item.MediaSources&&item.MediaSources.length>0){
-          var anchor=document.querySelector(SELECTORS.detailButtons);
-          if(anchor) createButtons(anchor,item);
+          state.item=item;
+        } else {
+          state.noMedia=true;
         }
-      }).catch(function(){}).then(function(){_injecting=false;});
-    }catch(e){_injecting=false;}
+      }).catch(function(){
+        if(_injection===state) state.retryAt=Date.now()+500;
+      }).then(function(){
+        if(_injection!==state) return;
+        _injecting=false;
+        scheduleInject(0);
+      });
+    }catch(e){
+      if(_injection===state){
+        _injecting=false;
+        state.retryAt=Date.now()+500;
+        retryInject();
+      }
+    }
   }
   function startObserver(){
-    var ob=new MutationObserver(function(){
-      if(showFlag()&&!document.getElementById('ExternalPlayersBtns')){
-        tryInject();
+    var ob=new MutationObserver(function(changes){
+      for(var i=0;i<changes.length;i++){
+        var change=changes[i];
+        var target=change.target;
+        if(change.type==='childList'||target.matches('.mainDetailButtons,.mediaInfo,#ExternalPlayersBtns')||
+          target.querySelector('.mainDetailButtons,.mediaInfo')){
+          scheduleInject(50);
+          break;
+        }
       }
     });
-    ob.observe(document.body,{childList:true,subtree:true});
+    ob.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden','aria-hidden']});
+    resetInjection();
   }
   if(document.body){startObserver();}
   else{document.addEventListener('DOMContentLoaded',startObserver);}
-  document.addEventListener('viewshow',function(){
-    _lastItemId=null;
-    var old=document.getElementById('ExternalPlayersBtns');
-    if(old) old.remove();
-    setTimeout(tryInject,300);
-  });
+  document.addEventListener('viewshow',resetInjection,true);
+  window.addEventListener('hashchange',resetInjection);
+  window.addEventListener('popstate',resetInjection);
 }
 
 // 同人图模块原样迁移自项目内置 fanart_show.js，仅由油猴设置控制是否启动。
