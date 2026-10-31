@@ -4001,6 +4001,9 @@ class DetailPageButtonPlugin extends BasePlugin {
     constructor() {
         super();
         this.answerCount = 1;
+        this.xunLeiSubtitleCache = new Map;
+        this.xunLeiSubtitleViewed = new Map;
+        this.xunLeiSubtitleViewListeners = new Set;
     }
     async handle() {
         let settingObj = await storageManager.getSetting();
@@ -4129,78 +4132,257 @@ class DetailPageButtonPlugin extends BasePlugin {
         window.refresh();
         utils.closePage();
     }
+    analyzeXunLeiSubtitle(text, fileExt) {
+        const lines = text.split(/\r\n|\n|\r/);
+        let dialogue;
+        if ("ass" === fileExt) {
+            // 只检查对白，避免样式、时间轴等内容掩盖乱码。
+            let inEvents = !1, textIndex = 9, fieldCount = 10;
+            const dialogueLines = [];
+            for (const line of lines) {
+                const section = line.match(/^\s*\[([^\]]+)\]/);
+                if (section) inEvents = "events" === section[1].toLowerCase();
+                if (inEvents && /^\s*Format\s*:/i.test(line)) {
+                    const fields = line.slice(line.indexOf(":") + 1).split(",").map((field => field.trim().toLowerCase()));
+                    textIndex = fields.indexOf("text");
+                    fieldCount = fields.length;
+                }
+                if (/^\s*Dialogue\s*:/i.test(line) && textIndex >= 0) {
+                    const fields = line.slice(line.indexOf(":") + 1).split(",");
+                    dialogueLines.push(fields.slice(textIndex, fields.length - (fieldCount - textIndex - 1)).join(","));
+                }
+            }
+            dialogue = dialogueLines.join("\n").replace(/\{[^}]*\}/g, "").replace(/\\[Nnh]/g, " ");
+        } else {
+            dialogue = lines.filter((line => !/^\s*\d+\s*$/.test(line) && !/^\s*\d+:\d+:\d+[,.]\d+\s*-->/.test(line))).join("\n");
+        }
+        dialogue = dialogue.replace(/<[^>]*>/g, "").replace(/\s/g, "");
+        const length = Math.max(dialogue.length, 1), badCount = (dialogue.match(/[\uFFFD\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\uE000-\uF8FF]/g) || []).length;
+        const badRatio = badCount / length, commonCount = (dialogue.match(/[的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天政四日那社义事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道命此变条只没结解问意建月公无系军很情者最立代想已通并提直题程展五果料象员革位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习便响约支般史感劳团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严龙飞這個來時為說對會與國學們後裡還發麼點開樣進過種從無頭應實體見讓當經長動兩愛聲話問變關別將萬東書車門馬風電業產義廣聽歡覺讀買賣難邊請謝\u3041-\u3096\u30A1-\u30FA]/g) || []).length;
+        return {
+            suspected: badCount >= 3 && badRatio >= .08 || badCount >= 2 && badRatio >= .3,
+            score: badRatio * 20 - commonCount / length
+        };
+    }
+    decodeXunLeiSubtitle(buffer, fileExt, responseHeaders = "") {
+        const bytes = new Uint8Array(buffer), decode = (encoding, fatal = !1) => new TextDecoder(encoding, { fatal: fatal }).decode(bytes);
+        if (239 === bytes[0] && 187 === bytes[1] && 191 === bytes[2]) return decode("utf-8");
+        if (255 === bytes[0] && 254 === bytes[1]) return decode("utf-16le");
+        if (254 === bytes[0] && 255 === bytes[1]) return decode("utf-16be");
+        const pairs = Math.min(Math.floor(bytes.length / 2), 512);
+        let evenZeros = 0, oddZeros = 0;
+        for (let i = 0; i < pairs; i++) {
+            0 === bytes[2 * i] && evenZeros++;
+            0 === bytes[2 * i + 1] && oddZeros++;
+        }
+        if (pairs >= 4 && oddZeros > pairs / 4 && evenZeros < pairs / 10) return decode("utf-16le");
+        if (pairs >= 4 && evenZeros > pairs / 4 && oddZeros < pairs / 10) return decode("utf-16be");
+        // 合法的 UTF-8 不再换编码，已经写入文件的替换字符仍需标记。
+        try {
+            return decode("utf-8", !0);
+        } catch {}
+        let bestText = decode("utf-8"), bestScore = this.analyzeXunLeiSubtitle(bestText, fileExt).score;
+        const charset = responseHeaders.match(/^content-type:[^\r\n]*?charset\s*=\s*["']?([^\s;"']+)/im);
+        const encodings = new Set([ charset && charset[1], "gb18030", "big5", "shift_jis" ].filter(Boolean));
+        for (const encoding of encodings) {
+            try {
+                const text = decode(encoding), score = this.analyzeXunLeiSubtitle(text, fileExt).score;
+                if (score < bestScore) {
+                    bestText = text;
+                    bestScore = score;
+                }
+            } catch {}
+        }
+        return bestText;
+    }
+    getXunLeiSubtitleText(url, fileExt) {
+        if (!url) return Promise.reject(new Error("未提供字幕链接"));
+        const cached = this.xunLeiSubtitleCache.get(url);
+        if (cached && cached.expiresAt > Date.now()) return cached.promise;
+        cached && clearTimeout(cached.timer);
+        const entry = { expiresAt: Infinity };
+        entry.promise = (async () => {
+            const [ httpTimeout, httpRetryCount ] = await Promise.all([ storageManager.getSetting("httpTimeout", 5e3), storageManager.getSetting("httpRetryCount", 3) ]);
+            const response = await utils.retry((() => new Promise(((resolve, reject) => {
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: url,
+                    responseType: "arraybuffer",
+                    timeout: httpTimeout,
+                    onload: response => {
+                        if (response.status >= 200 && response.status < 300 && response.response instanceof ArrayBuffer) resolve(response); else reject(new Error(`读取字幕失败，状态码：${response.status}`));
+                    },
+                    onerror: () => reject(new Error("读取字幕时发生网络错误")),
+                    ontimeout: () => reject(new Error("读取字幕超时")),
+                    onabort: () => reject(new Error("读取字幕已取消"))
+                });
+            }))), httpRetryCount);
+            return this.decodeXunLeiSubtitle(response.response, fileExt, response.responseHeaders);
+        })().then((text => {
+            entry.expiresAt = Date.now() + 18e5;
+            entry.timer = setTimeout((() => {
+                this.xunLeiSubtitleCache.get(url) === entry && this.xunLeiSubtitleCache.delete(url);
+            }), 18e5);
+            return text;
+        }), (error => {
+            this.xunLeiSubtitleCache.get(url) === entry && this.xunLeiSubtitleCache.delete(url);
+            throw error;
+        }));
+        this.xunLeiSubtitleCache.set(url, entry);
+        return entry.promise;
+    }
+    async prepareXunLeiSubtitles(items, onProgress, isClosed) {
+        const dataList = items.map((item => ({ ...item, xunLeiSuspected: !1 })));
+        let nextIndex = 0, completed = 0;
+        const worker = async () => {
+            while (nextIndex < dataList.length && !isClosed()) {
+                const item = dataList[nextIndex++], fileExt = String(item.ext || "").toLowerCase();
+                try {
+                    if ("ass" === fileExt || "srt" === fileExt) {
+                        const text = await this.getXunLeiSubtitleText(item.url, fileExt);
+                        item.xunLeiSuspected = this.analyzeXunLeiSubtitle(text, fileExt).suspected;
+                    }
+                } catch (error) {
+                    console.warn("字幕暂时无法检查，保留原条目：", item.name, error);
+                }
+                onProgress(++completed, dataList.length);
+            }
+        };
+        await Promise.all(Array.from({ length: Math.min(3, dataList.length) }, worker));
+        // 稳定分组，保留所有条目及各组内部的原始顺序。
+        return dataList.filter((item => !item.xunLeiSuspected)).concat(dataList.filter((item => item.xunLeiSuspected)));
+    }
+    markXunLeiSubtitleViewed(key) {
+        const previous = this.xunLeiSubtitleViewed.get(key), entry = { expiresAt: Date.now() + 18e5 };
+        previous && clearTimeout(previous.timer);
+        entry.timer = setTimeout((() => {
+            if (this.xunLeiSubtitleViewed.get(key) !== entry) return;
+            this.xunLeiSubtitleViewed.delete(key);
+            this.xunLeiSubtitleViewListeners.forEach((refresh => refresh()));
+        }), 18e5);
+        this.xunLeiSubtitleViewed.set(key, entry);
+        this.xunLeiSubtitleViewListeners.forEach((refresh => refresh()));
+    }
     searchXunLeiSubtitle(carNum2) {
         let loadObj = loading();
-        gmHttp.get(`https://api-shoulei-ssl.xunlei.com/oracle/subtitle?gcid=&cid=&name=${carNum2}`).then((res => {
-            let dataList = res.data;
-            dataList && 0 !== dataList.length ? layer.open({
+        return gmHttp.get(`https://api-shoulei-ssl.xunlei.com/oracle/subtitle?gcid=&cid=&name=${carNum2}`).then((res => {
+            let dataList = res.data, table, closed = !1, refreshViewedState;
+            Array.isArray(dataList) && 0 !== dataList.length ? layer.open({
                 type: 1,
                 title: "迅雷字幕",
-                content: '\n                    <div style="height: 100%;overflow:hidden;"> \n                        <div id="xunlei-table-container" style="height: 100%;padding-bottom: 20px"></div>\n                    </div>\n                ',
+                content: '\n                    <style>\n                        .xunlei-subtitle-table .xunlei-subtitle-tag {display:inline-block;margin-left:8px;padding:2px 6px;border:1px solid #f5c27a;border-radius:4px;background:#fff3df;color:#995700;font-size:12px;white-space:nowrap;}\n                        .xunlei-subtitle-table .a-primary.xunlei-subtitle-viewed {background:#eee4ff!important;border-color:#c4a5ef!important;color:#6941a5!important;}\n                    </style>\n                    <div style="height: 100%;overflow:hidden;"> \n                        <div id="xunlei-table-container" class="xunlei-subtitle-table" style="height: 100%;padding-bottom: 20px"></div>\n                    </div>\n                ',
                 scrollbar: !1,
                 area: utils.getResponsiveArea([ "60%", "70%" ]),
                 anim: -1,
-                success: (layero, index) => {
-                    new Tabulator("#xunlei-table-container", {
-                        layout: "fitColumns",
-                        placeholder: "暂无数据",
-                        virtualDom: !0,
-                        data: dataList,
-                        responsiveLayout: "collapse",
-                        responsiveLayoutCollapse: !0,
-                        columnDefaults: {
-                            headerHozAlign: "center",
-                            hozAlign: "center"
-                        },
-                        columns: [ {
-                            title: "文件名",
-                            field: "name",
-                            headerSort: !1,
-                            responsive: 0
-                        }, {
-                            title: "类型",
-                            field: "ext",
-                            headerSort: !1,
-                            responsive: 0
-                        }, {
-                            title: "操作",
-                            responsive: 0,
-                            headerSort: !1,
-                            formatter: (cell, formatterParams, onRendered) => {
-                                const item = cell.getData();
-                                onRendered((() => {
-                                    const previewButton = cell.getElement().querySelector(".a-primary"), downButton = cell.getElement().querySelector(".a-success");
-                                    previewButton && previewButton.addEventListener("click", (async e => {
-                                        let url = item.url, name2 = carNum2 + "." + item.ext;
-                                        this.previewSubtitle(url, name2);
+                success: async (layero, index) => {
+                    const container = layero[0].querySelector("#xunlei-table-container");
+                    utils.setupEscClose(index);
+                    container.textContent = `正在检查字幕，已完成0/${dataList.length}`;
+                    try {
+                        dataList = await this.prepareXunLeiSubtitles(dataList, ((completed, total) => {
+                            if (!closed) container.textContent = `正在检查字幕，已完成${completed}/${total}`;
+                        }), (() => closed));
+                        if (closed) return;
+                        container.textContent = "";
+                        const suspectedCount = dataList.filter((item => item.xunLeiSuspected)).length;
+                        layer.title(`迅雷字幕（共${dataList.length}条，疑似乱码${suspectedCount}条）`, index);
+                        refreshViewedState = () => {
+                            container.querySelectorAll(".xunlei-subtitle-preview").forEach((button => {
+                                const entry = this.xunLeiSubtitleViewed.get(button.dataset.xunleiKey), viewed = !!entry && entry.expiresAt > Date.now();
+                                button.classList.toggle("xunlei-subtitle-viewed", viewed);
+                                button.textContent = viewed ? "已预览" : "预览";
+                            }));
+                        };
+                        table = new Tabulator(container, {
+                            layout: "fitColumns",
+                            placeholder: "暂无数据",
+                            virtualDom: !0,
+                            data: dataList,
+                            responsiveLayout: "collapse",
+                            responsiveLayoutCollapse: !0,
+                            columnDefaults: {
+                                headerHozAlign: "center",
+                                hozAlign: "center"
+                            },
+                            columns: [ {
+                                title: "文件名",
+                                field: "name",
+                                headerSort: !1,
+                                responsive: 0,
+                                formatter: cell => {
+                                    const item = cell.getData(), name = document.createElement("span");
+                                    name.textContent = item.name || "";
+                                    if (item.xunLeiSuspected) {
+                                        const tag = document.createElement("span");
+                                        tag.className = "xunlei-subtitle-tag";
+                                        tag.textContent = "疑似乱码";
+                                        name.appendChild(tag);
+                                    }
+                                    return name;
+                                }
+                            }, {
+                                title: "类型",
+                                field: "ext",
+                                headerSort: !1,
+                                responsive: 0
+                            }, {
+                                title: "操作",
+                                responsive: 0,
+                                headerSort: !1,
+                                formatter: (cell, formatterParams, onRendered) => {
+                                    const item = cell.getData(), key = carNum2 + "\n" + item.url;
+                                    const viewedEntry = this.xunLeiSubtitleViewed.get(key), viewed = !!viewedEntry && viewedEntry.expiresAt > Date.now();
+                                    onRendered((() => {
+                                        const previewButton = cell.getElement().querySelector(".a-primary"), downButton = cell.getElement().querySelector(".a-success");
+                                        previewButton && (previewButton.dataset.xunleiKey = key);
+                                        previewButton && previewButton.addEventListener("click", (async e => {
+                                            let url = item.url, name2 = carNum2 + "." + item.ext;
+                                            if (await this.previewSubtitle(url, name2)) this.markXunLeiSubtitleViewed(key);
+                                        }));
+                                        downButton && downButton.addEventListener("click", (async e => {
+                                            try {
+                                                let url = item.url, name2 = carNum2 + "." + item.ext;
+                                                const content = await this.getXunLeiSubtitleText(url, String(item.ext || "").toLowerCase());
+                                                utils.download(content, name2);
+                                            } catch (error) {
+                                                show.error(`下载字幕失败：${error.message}`);
+                                            }
+                                        }));
+                                        refreshViewedState();
                                     }));
-                                    downButton && downButton.addEventListener("click", (async e => {
-                                        let url = item.url, name2 = carNum2 + "." + item.ext, content = await gmHttp.get(url);
-                                        utils.download(content, name2);
-                                    }));
-                                }));
-                                return '\n                                        <a class="a-primary">预览</a>\n                                        <a class="a-success">下载</a>\n                                    ';
-                            }
-                        } ],
-                        locale: "zh-cn",
-                        langs: {
-                            "zh-cn": {
-                                pagination: {
-                                    first: "首页",
-                                    first_title: "首页",
-                                    last: "尾页",
-                                    last_title: "尾页",
-                                    prev: "上一页",
-                                    prev_title: "上一页",
-                                    next: "下一页",
-                                    next_title: "下一页",
-                                    all: "所有",
-                                    page_size: "每页行数"
+                                    return `<a class="a-primary xunlei-subtitle-preview${viewed ? " xunlei-subtitle-viewed" : ""}">${viewed ? "已预览" : "预览"}</a>\n                                        <a class="a-success">下载</a>`;
+                                }
+                            } ],
+                            locale: "zh-cn",
+                            langs: {
+                                "zh-cn": {
+                                    pagination: {
+                                        first: "首页",
+                                        first_title: "首页",
+                                        last: "尾页",
+                                        last_title: "尾页",
+                                        prev: "上一页",
+                                        prev_title: "上一页",
+                                        next: "下一页",
+                                        next_title: "下一页",
+                                        all: "所有",
+                                        page_size: "每页行数"
+                                    }
                                 }
                             }
+                        });
+                        this.xunLeiSubtitleViewListeners.add(refreshViewedState);
+                    } catch (error) {
+                        if (!closed) {
+                            container.textContent = "字幕列表加载失败，请关闭后重新获取。";
+                            console.error("加载迅雷字幕列表失败：", error);
                         }
-                    });
-                    utils.setupEscClose(index);
+                    }
+                },
+                end: () => {
+                    closed = !0;
+                    this.xunLeiSubtitleViewListeners.delete(refreshViewedState);
+                    table && table.destroy();
                 }
             }) : show.error("迅雷中找不到相关字幕!");
         })).catch((e => {
@@ -4304,11 +4486,11 @@ class DetailPageButtonPlugin extends BasePlugin {
     async previewSubtitle(url, name2) {
         if (!url) {
             console.error("未提供文件URL");
-            return;
+            return !1;
         }
-        const fileExt = url.split(".").pop().toLowerCase();
+        const fileExt = name2.split(".").pop().toLowerCase();
         if ("ass" === fileExt || "srt" === fileExt) try {
-            let resText = await gmHttp.get(url), title = "字幕预览";
+            let resText = await this.getXunLeiSubtitleText(url, fileExt), title = "字幕预览";
             "ass" === fileExt ? title = "ASS字幕预览 - " + name2 : "srt" === fileExt && (title = "SRT字幕预览 - " + name2);
             const lines = resText.split("\n");
             let numberedContent = "";
@@ -4330,10 +4512,12 @@ class DetailPageButtonPlugin extends BasePlugin {
                     return !1;
                 }
             });
+            return !0;
         } catch (error) {
             show.error(`预览失败: ${error.message}`);
             console.error("预览字幕文件出错:", error);
         } else show.error("仅支持预览ASS和SRT字幕文件");
+        return !1;
     }
 }
 
