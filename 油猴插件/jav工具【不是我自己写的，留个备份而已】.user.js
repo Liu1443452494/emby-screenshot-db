@@ -4249,8 +4249,13 @@ class DetailPageButtonPlugin extends BasePlugin {
             }
         };
         await Promise.all(Array.from({ length: Math.min(3, dataList.length) }, worker));
-        // 稳定分组，保留所有条目及各组内部的原始顺序。
-        return dataList.filter((item => !item.xunLeiSuspected)).concat(dataList.filter((item => item.xunLeiSuspected)));
+        // 疑似乱码排最后，各组内依次排列 ASS、SRT、其他格式，同类保留原始顺序。
+        const groups = Array.from({ length: 6 }, (() => []));
+        for (const item of dataList) {
+            const fileExt = String(item.ext || "").toLowerCase(), typeIndex = "ass" === fileExt ? 0 : "srt" === fileExt ? 1 : 2;
+            groups[(item.xunLeiSuspected ? 3 : 0) + typeIndex].push(item);
+        }
+        return [].concat(...groups);
     }
     markXunLeiSubtitleViewed(key) {
         const previous = this.xunLeiSubtitleViewed.get(key), entry = { expiresAt: Date.now() + 18e5 };
