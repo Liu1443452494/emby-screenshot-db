@@ -4195,6 +4195,25 @@ class DetailPageButtonPlugin extends BasePlugin {
         }
         return bestText;
     }
+    getXunLeiSubtitleCount(text, fileExt) {
+        // 只统计对白记录或字幕块，正文换行、样式和空行不增加条数。
+        if ("ass" === fileExt) return (text.match(/^[ \t]*Dialogue[ \t]*:/gim) || []).length;
+        if ("srt" !== fileExt) return null;
+        const timeline = /^[ \t]*\d+:\d{2}:\d{2}[,.]\d{1,3}[ \t]*-->[ \t]*\d+:\d{2}:\d{2}[,.]\d{1,3}(?:[ \t].*)?$/;
+        return text.replace(/\r\n?/g, "\n").split(/\n[ \t]*\n+/).filter((block => {
+            const lines = block.trim().split("\n"), index = /^\d+$/.test(lines[0].trim()) ? 1 : 0;
+            return timeline.test(lines[index] || "");
+        })).length;
+    }
+    isInvalidXunLeiSubtitle(text) {
+        const content = text.trim();
+        // 只识别明确的错误文档，避免把乱码或没有对白的字幕误删。
+        if (/^(?:<\?xml\b[\s\S]*?\?>\s*)?<Error\b[^>]*>[\s\S]*<\/Error>\s*$/i.test(content)) {
+            return /<Code\b[^>]*>\s*[^<]+\s*<\/Code>/i.test(content);
+        }
+        return /^(?:<!doctype\s+html\b[^>]*>\s*)?<html\b[^>]*>[\s\S]*<\/html>\s*$/i.test(content)
+            && /<(title|h1)\b[^>]*>[^<]*(?:\b(?:403|404|410)\b|not\s+found|no\s*such\s*key|access\s+denied|forbidden|文件不存在|资源不存在)[^<]*<\/\1>/i.test(content);
+    }
     getXunLeiSubtitleText(url, fileExt) {
         if (!url) return Promise.reject(new Error("未提供字幕链接"));
         const cached = this.xunLeiSubtitleCache.get(url);
@@ -4210,6 +4229,8 @@ class DetailPageButtonPlugin extends BasePlugin {
                     responseType: "arraybuffer",
                     timeout: httpTimeout,
                     onload: response => {
+                        // 已确认文件不存在时不再重试，交给外层统一标记。
+                        if (404 === response.status || 410 === response.status) return resolve(response);
                         if (response.status >= 200 && response.status < 300 && response.response instanceof ArrayBuffer) resolve(response); else reject(new Error(`读取字幕失败，状态码：${response.status}`));
                     },
                     onerror: () => reject(new Error("读取字幕时发生网络错误")),
@@ -4217,7 +4238,12 @@ class DetailPageButtonPlugin extends BasePlugin {
                     onabort: () => reject(new Error("读取字幕已取消"))
                 });
             }))), httpRetryCount);
-            return this.decodeXunLeiSubtitle(response.response, fileExt, response.responseHeaders);
+            if (404 === response.status || 410 === response.status) throw Object.assign(new Error("字幕文件不存在"), { xunLeiInvalid: !0 });
+            const text = this.decodeXunLeiSubtitle(response.response, fileExt, response.responseHeaders);
+            if (this.isInvalidXunLeiSubtitle(text)) throw Object.assign(new Error("字幕链接返回了无效内容"), { xunLeiInvalid: !0 });
+            // 保留原始字节数，避免用解码后的字符数或重新编码估算大小。
+            entry.byteLength = response.response.byteLength;
+            return text;
         })().then((text => {
             entry.expiresAt = Date.now() + 18e5;
             entry.timer = setTimeout((() => {
@@ -4232,18 +4258,21 @@ class DetailPageButtonPlugin extends BasePlugin {
         return entry.promise;
     }
     async prepareXunLeiSubtitles(items, onProgress, isClosed) {
-        const dataList = items.map((item => ({ ...item, xunLeiSuspected: !1 })));
+        const dataList = items.map((item => ({ ...item, xunLeiSuspected: !1, xunLeiInvalid: !1, xunLeiSize: null, xunLeiCount: null })));
         let nextIndex = 0, completed = 0;
         const worker = async () => {
             while (nextIndex < dataList.length && !isClosed()) {
                 const item = dataList[nextIndex++], fileExt = String(item.ext || "").toLowerCase();
                 try {
+                    const text = await this.getXunLeiSubtitleText(item.url, fileExt);
+                    const cached = this.xunLeiSubtitleCache.get(item.url);
+                    item.xunLeiSize = cached && Number.isFinite(cached.byteLength) ? cached.byteLength : null;
+                    item.xunLeiCount = this.getXunLeiSubtitleCount(text, fileExt);
                     if ("ass" === fileExt || "srt" === fileExt) {
-                        const text = await this.getXunLeiSubtitleText(item.url, fileExt);
                         item.xunLeiSuspected = this.analyzeXunLeiSubtitle(text, fileExt).suspected;
                     }
                 } catch (error) {
-                    console.warn("字幕暂时无法检查，保留原条目：", item.name, error);
+                    if (error && error.xunLeiInvalid) item.xunLeiInvalid = !0; else console.warn("字幕暂时无法检查，保留原条目：", item.name, error);
                 }
                 onProgress(++completed, dataList.length);
             }
@@ -4252,6 +4281,7 @@ class DetailPageButtonPlugin extends BasePlugin {
         // 疑似乱码排最后，各组内依次排列 ASS、SRT、其他格式，同类保留原始顺序。
         const groups = Array.from({ length: 6 }, (() => []));
         for (const item of dataList) {
+            if (item.xunLeiInvalid) continue;
             const fileExt = String(item.ext || "").toLowerCase(), typeIndex = "ass" === fileExt ? 0 : "srt" === fileExt ? 1 : 2;
             groups[(item.xunLeiSuspected ? 3 : 0) + typeIndex].push(item);
         }
@@ -4300,7 +4330,7 @@ class DetailPageButtonPlugin extends BasePlugin {
                         };
                         table = new Tabulator(container, {
                             layout: "fitColumns",
-                            placeholder: "暂无数据",
+                            placeholder: "未找到有效字幕",
                             virtualDom: !0,
                             data: dataList,
                             responsiveLayout: "collapse",
@@ -4330,6 +4360,29 @@ class DetailPageButtonPlugin extends BasePlugin {
                                 field: "ext",
                                 headerSort: !1,
                                 responsive: 0
+                            }, {
+                                title: "大小",
+                                field: "xunLeiSize",
+                                width: 100,
+                                headerSort: !0,
+                                sorter: "number",
+                                sorterParams: { alignEmptyValues: "bottom" },
+                                responsive: 0,
+                                formatter: cell => {
+                                    const size = cell.getValue();
+                                    if (!Number.isFinite(size)) return "—";
+                                    if (size < 1024) return `${size} B`;
+                                    return size < 1048576 ? `${(size / 1024).toFixed(1)} KB` : `${(size / 1048576).toFixed(1)} MB`;
+                                }
+                            }, {
+                                title: "字幕条数",
+                                field: "xunLeiCount",
+                                width: 110,
+                                headerSort: !0,
+                                sorter: "number",
+                                sorterParams: { alignEmptyValues: "bottom" },
+                                responsive: 0,
+                                formatter: cell => null == cell.getValue() ? "—" : cell.getValue()
                             }, {
                                 title: "操作",
                                 responsive: 0,
@@ -5007,6 +5060,21 @@ class ReviewPlugin extends BasePlugin {
         return "ReviewPlugin";
     }
     async handle() {
+        $(document).on("click", "#reviewsContainer .copy-ed2k", (async event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const $btn = $(event.currentTarget);
+            try {
+                // 还原原始链接，保留文件名中的中文和特殊字符。
+                const link = decodeURIComponent($btn.attr("data-ed2k"));
+                await navigator.clipboard.writeText(link);
+                $btn.text("已复制");
+                setTimeout((() => $btn.text("复制")), 2e3);
+            } catch (err) {
+                show.error("复制失败，请重试或手动复制链接");
+                console.error("复制 ed2k 链接失败:", err);
+            }
+        }));
         $(document).on("click", ".down-115", (async event => {
             const magnet = $(event.currentTarget).data("magnet");
             let loadObj = loading();
@@ -5128,7 +5196,7 @@ class ReviewPlugin extends BasePlugin {
         if (dataList.length) {
             dataList.forEach((item => {
                 if (reviewKeywordList.some((keyword => item.content.includes(keyword)))) return;
-                const starsHtml = Array(item.score).fill('<i class="icon-star"></i>').join(""), content = item.content.replace(/ed2k:\/\/\|file\|[^|]+\|\d+\|[a-fA-F0-9]{32}\|\/|magnet:\?[^\s"'<>`\u4e00-\u9fa5，。？！（）【】]+|https?:\/\/[^\s"'<>`\u4e00-\u9fa5，。？！（）【】]+/g, (match => match.startsWith("ed2k://") ? `\n                            <span style="word-break: break-all;background: #e0f2fe;color: #0369a1;">${match}</span>\n                            <button class="button is-info down-115" data-magnet="${match}" style="font-size: 11px">115离线下载</button>\n                        ` : match.startsWith("magnet:") ? `\n                            <a href="${match}" class="a-primary" style="padding:0; word-break: break-all; white-space: pre-wrap;" target="_blank" rel="noopener noreferrer">${match}</a>\n                            <button class="button is-info down-115" data-magnet="${match}" style="font-size: 11px">115离线下载</button>\n                        ` : match.startsWith("http://") || match.startsWith("https://") ? `\n                            <a href="${match}" class="a-primary" style="padding:0; word-break: break-all; white-space: pre-wrap;" target="_blank" rel="noopener noreferrer">${match}</a>\n                        ` : match)), commentHtml = `\n                <div class="item columns is-desktop" style="display:block;margin-top:6px;background-color:#ffffff;padding:10px;margin-left: -10px;word-break: break-word;position:relative;">\n                    <span style="position:absolute;top:5px;right:10px;color:#999;font-size:12px;">#${this.floorIndex++}楼</span>\n                    ${item.username} &nbsp;&nbsp; <span class="score-stars">${starsHtml}</span> \n                    <span class="time">${utils.formatDate(item.created_at)}</span> \n                    &nbsp;&nbsp; 点赞:${item.likes_count}\n                    <p class="review-content" style="margin-top: 5px;"> ${content} </p>\n                </div>\n            `;
+                const starsHtml = Array(item.score).fill('<i class="icon-star"></i>').join(""), content = item.content.replace(/ed2k:\/\/\|file\|[^|]+\|\d+\|[a-fA-F0-9]{32}\|\/|magnet:\?[^\s"'<>`\u4e00-\u9fa5，。？！（）【】]+|https?:\/\/[^\s"'<>`\u4e00-\u9fa5，。？！（）【】]+/g, (match => match.startsWith("ed2k://") ? `\n                            <span style="word-break: break-all;background: #e0f2fe;color: #0369a1;">${match}</span>\n                            <button type="button" class="button is-info copy-ed2k" data-ed2k="${encodeURIComponent(match)}" style="font-size: 11px">复制</button>\n                            <button class="button is-info down-115" data-magnet="${match}" style="font-size: 11px">115离线下载</button>\n                        ` : match.startsWith("magnet:") ? `\n                            <a href="${match}" class="a-primary" style="padding:0; word-break: break-all; white-space: pre-wrap;" target="_blank" rel="noopener noreferrer">${match}</a>\n                            <button class="button is-info down-115" data-magnet="${match}" style="font-size: 11px">115离线下载</button>\n                        ` : match.startsWith("http://") || match.startsWith("https://") ? `\n                            <a href="${match}" class="a-primary" style="padding:0; word-break: break-all; white-space: pre-wrap;" target="_blank" rel="noopener noreferrer">${match}</a>\n                        ` : match)), commentHtml = `\n                <div class="item columns is-desktop" style="display:block;margin-top:6px;background-color:#ffffff;padding:10px;margin-left: -10px;word-break: break-word;position:relative;">\n                    <span style="position:absolute;top:5px;right:10px;color:#999;font-size:12px;">#${this.floorIndex++}楼</span>\n                    ${item.username} &nbsp;&nbsp; <span class="score-stars">${starsHtml}</span> \n                    <span class="time">${utils.formatDate(item.created_at)}</span> \n                    &nbsp;&nbsp; 点赞:${item.likes_count}\n                    <p class="review-content" style="margin-top: 5px;"> ${content} </p>\n                </div>\n            `;
                 $container.append(commentHtml);
             }));
             this.rightClickFilter();
